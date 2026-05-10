@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <!-- Banner -->
+  <div class="banner text-center mb-4">
+      <h2>Welcome to Our Online Pharmacy</h2>
+      <p>Find safe OTC medications easily</p>
+  </div>
+
+  <!-- Medications Section -->
+  <h4 class="mb-3">Available Medications</h4>
+
+  <div class="row">
+    {% for med in medications %}
+
+    <div class="col-md-4">
+      <div class="card mb-3">
+        <div class="card-body">
+
+          <h5 class="card-title">
+            <a href="/medication/{{ med.id }}">{{ med.name }}</a>
+          </h5>
+
+          <p>{{ med.description }}</p>
+
+          <p><strong>Price:</strong> R{{ med.price }}</p>
+          <p><strong>Stock:</strong> {{ med.stock }}</p>
+
+          <a href="/add-to-cart/{{ med.id }}" class="btn btn-success">Add to Cart</a>
+
+        </div>
+      </div>
+    </div>
+
+    {% empty %}
+    <div class="alert alert-warning">
+      No medications available.
+    </div>
+    {% endfor %}
+  </div> <!-- row -->
+
+</div> <!-- container -->
+
+{% endblock %}

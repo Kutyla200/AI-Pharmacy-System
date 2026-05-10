@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+
+<h2>Your Cart</h2>
+
+
+{% if warnings %}
+
+<div class="alert alert-danger">
+
+<h4>⚠ Drug Interaction Warnings</h4>
+
+<ul>
+
+{% for warning in warnings %}
+
+<li>
+
+<strong>
+{{ warning.medication1.name }}
+</strong>
+
+and
+
+<strong>
+{{ warning.medication2.name }}
+</strong>
+
+may interact.
+
+<br>
+
+<strong>Risk Level:</strong>
+{{ warning.severity }}
+
+<br>
+
+{{ warning.description }}
+
+</li>
+
+<br>
+
+{% endfor %}
+
+</ul>
+
+</div>
+
+{% endif %}
+
+<table class="table">
+
+<tr>
+<th>Medication</th>
+<th>Quantity</th>
+<th>Price</th>
+</tr>
+
+{% for item in items %}
+
+<tr>
+<td>{{ item.medication.name }}</td>
+<td>{{ item.quantity }}</td>
+<td>R{{ item.medication.price }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<h4>Total: R{{ total }}</h4>
+
+<a href="/checkout" class="btn btn-primary">Checkout</a>
+
+{% endblock %}

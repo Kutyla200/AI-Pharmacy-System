@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>Order Successful</h2>
+
+<p>Order ID: {{ order.id }}</p>
+
+<br>
+
+<table class="table">
+
+<tr>
+<th>Medication</th>
+<th>Quantity</th>
+<th>Price</th>
+</tr>
+
+{% for item in items %}
+
+<tr>
+<td>{{ item.medication.name }}</td>
+<td>{{ item.quantity }}</td>
+<td>R{{ item.medication.price }}</td>
+</tr>
+
+{% endfor %}
+
+</table>
+
+<h4>Total: R{{ total }}</h4>
+
+<br>
+
+<a href="/medications" class="btn btn-primary">
+Continue Shopping
+</a>
+
+<a href="/my-orders" class="btn btn-success">
+View My Orders
+</a>
+
+{% endblock %}

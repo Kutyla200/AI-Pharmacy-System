@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<h2>{{ medication.name }}</h2>
+
+<p>{{ medication.description }}</p>
+
+<p><strong>Price:</strong> R{{ medication.price }}</p>
+<p><strong>Stock:</strong> {{ medication.stock }}</p>
+
+<hr>
+
+<form action="/add-to-cart/{{ medication.id }}/" method="POST">
+    {% csrf_token %}
+
+    <label><strong>Select Quantity:</strong></label>
+
+    <input 
+        type="number" 
+        name="quantity" 
+        value="1" 
+        min="1" 
+        max="{{ medication.stock }}"
+        class="form-control mb-3"
+    >
+
+    <button class="btn btn-success w-100">
+        Add to Cart
+    </button>
+
+</form>
+
+<br>
+
+<a href="/medications/" class="btn btn-secondary">
+← Back to Shop
+</a>
+
+</div>
+
+{% endblock %}
