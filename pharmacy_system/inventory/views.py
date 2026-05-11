@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.shortcuts import render, get_object_or_404
 from .models import Medication, CartItem, Order, OrderItem
 from .models import DrugInteraction
+from .models import AIRecommendationLog
 from django.db.models import Q
 
 def medication_detail(request, id):
@@ -29,7 +30,17 @@ def medication_list(request):
 
 @login_required
 def dashboard(request):
-    return medication_list(request)
+
+    medications = Medication.objects.all()
+
+    print("COUNT:", medications.count())
+
+    for med in medications:
+        print(med.name)
+
+    return render(request, 'dashboard.html', {
+        'medications': medications
+    })
 
 @login_required
 def add_to_cart(request, med_id):
@@ -58,29 +69,30 @@ def view_cart(request):
 
     total = sum(item.medication.price * item.quantity for item in items)
 
-    # 🔥 THIS MUST COME BEFORE ANY USE
-    warnings = []
+    warnings = set()
 
     medications = [item.medication for item in items]
 
-    print([m.name for m in medications])  # debug OK
+    for med1 in medications:
+        for med2 in medications:
 
-    # interaction logic goes here
-    for i in range(len(medications)):
-        for j in range(i + 1, len(medications)):
+            if med1 != med2:
 
-            med1 = medications[i]
-            med2 = medications[j]
+                interaction = DrugInteraction.objects.filter(
+                    medication1=med1,
+                    medication2=med2
+                ).first()
 
-            interaction = DrugInteraction.objects.filter(
-                medication1=med1,
-                medication2=med2
-            ).first()
+                reverse_interaction = DrugInteraction.objects.filter(
+                    medication1=med2,
+                    medication2=med1
+                ).first()
 
-            if interaction:
-                warnings.append(interaction)
+                if interaction and interaction not in warnings:
+                    warnings.add(interaction)
 
-    print(warnings)  # debug OK
+                if reverse_interaction and reverse_interaction not in warnings:
+                    warnings.add(reverse_interaction)
 
     return render(request, 'cart.html', {
         'items': items,
@@ -144,4 +156,136 @@ def my_orders(request):
 
     return render(request, 'my_orders.html', {
         'orders': orders
+    })
+
+@login_required
+def ai_symptom_checker(request):
+
+    medication_objects = []
+
+    step = 1
+
+    # STEP 1 → SELECT SYMPTOMS
+    if request.method == "POST" and "symptoms" in request.POST:
+
+        symptoms = request.POST.getlist('symptoms')
+
+        request.session['symptoms'] = symptoms
+
+        step = 2
+
+        return render(request, 'ai_checker.html', {
+            'step': step,
+            'symptoms': symptoms
+        })
+
+    # STEP 2 → SELECT SEVERITY
+    elif request.method == "POST" and "severity" in request.POST:
+
+        symptoms = request.session.get('symptoms', [])
+
+        severity = request.POST.get('severity')
+
+        recommendations = []
+
+        message = " ".join(symptoms).lower()
+
+        # HEADACHE / FEVER
+        if 'headache' in message or 'fever' in message:
+
+            recommendations.append({
+                'medicine': 'Paracetamol',
+                'confidence': 90,
+                'risk': 'Low',
+                'explanation': f'I understand your symptoms are {severity.lower()}. Paracetamol may help reduce fever and headache.'
+            })
+
+            recommendations.append({
+                'medicine': 'Panado',
+                'confidence': 85,
+                'risk': 'Low',
+                'explanation': 'Panado may help relieve pain and fever symptoms.'
+            })
+
+        # ALLERGIES
+        if 'allergies' in message or 'sneezing' in message:
+
+            recommendations.append({
+                'medicine': 'Loratadine',
+                'confidence': 88,
+                'risk': 'Low',
+                'explanation': 'Loratadine may help reduce allergy symptoms and sneezing.'
+            })
+
+            recommendations.append({
+                'medicine': 'Cetirizine',
+                'confidence': 82,
+                'risk': 'Medium',
+                'explanation': 'Cetirizine helps relieve allergic reactions.'
+            })
+
+        # PAIN / INFLAMMATION
+        if 'pain' in message or 'inflammation' in message:
+
+            recommendations.append({
+                'medicine': 'Ibuprofen',
+                'confidence': 90,
+                'risk': 'Medium',
+                'explanation': 'Ibuprofen is commonly used for pain and inflammation.'
+            })
+
+            recommendations.append({
+                'medicine': 'Aspirin',
+                'confidence': 75,
+                'risk': 'Medium',
+                'explanation': 'Aspirin may assist with mild pain relief.'
+            })
+
+        # NOTHING MATCHED
+        if not recommendations:
+
+            recommendations.append({
+                'medicine': 'Consult Pharmacist',
+                'confidence': 50,
+                'risk': 'High',
+                'explanation': 'Symptoms unclear. Professional medical advice is recommended.'
+            })
+
+        # SAVE LOGS
+        for rec in recommendations:
+
+            AIRecommendationLog.objects.create(
+                user=request.user,
+                symptoms=", ".join(symptoms),
+                recommended_medication=rec['medicine'],
+                confidence_score=rec['confidence'],
+                risk_level=rec['risk'],
+                explanation=rec['explanation']
+            )
+
+        # GET MEDICATION OBJECTS
+        for rec in recommendations:
+
+            med = Medication.objects.filter(
+                name__iexact=rec['medicine']
+            ).first()
+
+            if med:
+
+                medication_objects.append({
+                    'med': med,
+                    'info': rec
+                })
+
+        step = 3
+
+        return render(request, 'ai_checker.html', {
+            'step': step,
+            'medication_objects': medication_objects,
+            'severity': severity,
+            'symptoms': symptoms
+        })
+
+    return render(request, 'ai_checker.html', {
+        'step': step
     })

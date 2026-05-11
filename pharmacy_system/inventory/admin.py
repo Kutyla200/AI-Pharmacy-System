@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Medication, CartItem, Order, OrderItem
+from .models import Medication, CartItem, Order, OrderItem, DrugInteraction, AIRecommendationLog
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -14,3 +14,5 @@ admin.site.register(Medication)
 admin.site.register(CartItem)
 admin.site.register(Order, OrderAdmin)
 admin.site.register(OrderItem)
+admin.site.register(DrugInteraction)
+admin.site.register(AIRecommendationLog)

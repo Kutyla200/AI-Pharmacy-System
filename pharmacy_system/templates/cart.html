@@ -2,15 +2,16 @@
 
 {% block content %}
 
-
-<h2>Your Cart</h2>
-
-
 {% if warnings %}
 
-<div class="alert alert-danger">
+<div class="alert alert-warning">
 
-<h4>⚠ Drug Interaction Warnings</h4>
+<h4>⚠ Possible Drug Interactions Detected</h4>
+
+<p>
+The following medications in your cart may interact with each other.
+Please consult a healthcare professional before use.
+</p>
 
 <ul>
 
@@ -27,8 +28,6 @@ and
 <strong>
 {{ warning.medication2.name }}
 </strong>
-
-may interact.
 
 <br>
 
@@ -50,6 +49,9 @@ may interact.
 </div>
 
 {% endif %}
+
+<h2>Your Cart</h2>
+
 
 <table class="table">
 

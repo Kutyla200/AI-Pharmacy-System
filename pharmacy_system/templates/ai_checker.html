@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container mt-4" style="max-width:700px;">
+
+<h2 class="mb-4">🤖 AI Pharmacy Assistant</h2>
+
+<!-- STEP 1 -->
+{% if step == 1 %}
+
+<div class="card p-4 shadow-sm">
+
+<div class="alert alert-primary">
+
+🤖 Hello 👋  
+What symptoms are you experiencing today?
+
+</div>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="symptoms" value="headache">
+<label class="form-check-label">Headache</label>
+</div>
+
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="symptoms" value="fever">
+<label class="form-check-label">Fever</label>
+</div>
+
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="symptoms" value="pain">
+<label class="form-check-label">Pain</label>
+</div>
+
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="symptoms" value="inflammation">
+<label class="form-check-label">Inflammation</label>
+</div>
+
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="symptoms" value="allergies">
+<label class="form-check-label">Allergies</label>
+</div>
+
+<div class="form-check">
+<input class="form-check-input" type="checkbox" name="symptoms" value="sneezing">
+<label class="form-check-label">Sneezing</label>
+</div>
+
+<br>
+
+<button class="btn btn-primary w-100">
+Next
+</button>
+
+</form>
+
+</div>
+
+{% endif %}
+
+<!-- STEP 2 -->
+{% if step == 2 %}
+
+<div class="card p-4 shadow-sm">
+
+<div class="alert alert-secondary">
+
+🤖 I understand you selected:
+
+<strong>
+{{ symptoms|join:", " }}
+</strong>
+
+<br><br>
+
+How severe are your symptoms?
+
+</div>
+
+<form method="POST">
+
+{% csrf_token %}
+
+<select class="form-select" name="severity">
+
+<option value="Mild">Mild</option>
+
+<option value="Moderate">Moderate</option>
+
+<option value="Severe">Severe</option>
+
+</select>
+
+<br>
+
+<button class="btn btn-success w-100">
+Submit
+</button>
+
+</form>
+
+</div>
+
+{% endif %}
+
+<!-- STEP 3 -->
+{% if step == 3 %}
+
+<div class="alert alert-info">
+
+🤖 Based on your symptoms and severity level, I recommend the following medications:
+
+</div>
+
+{% for item in medication_objects %}
+
+<div class="card mt-3 shadow-sm">
+
+<div class="card-body">
+
+<h4>{{ item.med.name }}</h4>
+
+<p><strong>Confidence:</strong> {{ item.info.confidence }}%</p>
+
+<p><strong>Risk:</strong> {{ item.info.risk }}</p>
+
+<p><strong>Explanation:</strong> {{ item.info.explanation }}</p>
+
+<p><strong>Price:</strong> R{{ item.med.price }}</p>
+
+<form method="POST" action="/add-to-cart/{{ item.med.id }}/">
+
+{% csrf_token %}
+
+<input type="hidden" name="quantity" value="1">
+
+<button class="btn btn-success">
+Add to Cart
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+{% endfor %}
+
+<div class="alert alert-warning mt-4">
+
+⚠ AI-assisted recommendations only.
+Consult a healthcare professional if symptoms persist.
+
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

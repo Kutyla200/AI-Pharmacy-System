@@ -71,7 +71,10 @@ SmartPharm
 <div class="navbar-top d-flex align-items-center justify-content-between">
 
 <div class="logo">
-SmartPharm
+    <a href="{% url 'dashboard' %}" 
+       style="color:white; text-decoration:none;">
+       SmartPharm
+    </a>
 </div>
 
 <form class="search-bar" method="GET" action="/medications">
@@ -86,6 +89,8 @@ SmartPharm
 <span class="icon-btn">
   {{ request.user.username }}
 </span>
+<a href="/ai-checker" class="icon-btn">🤖</a>
+
 <a href="/profile" class="icon-btn">👤Profile</a>
 
 <a href="/logout/" class="icon-btn">Logout</a>

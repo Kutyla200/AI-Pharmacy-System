@@ -12,6 +12,7 @@
 
   <!-- Medications Section -->
   <h4 class="mb-3">Available Medication</h4>
+  <p>Total medications: {{ medications|length }}</p>
 
   <div class="row">
     {% for med in medication %}
@@ -27,7 +28,7 @@
           <p>{{ med.description }}</p>
 
           <p><strong>Price:</strong> R{{ med.price }}</p>
-          <p><strong>Stock:</strong> {{ med.stock }}</p>
+          
 
           <a href="/add-to-cart/{{ med.id }}" class="btn btn-success">Add to Cart</a>
 
