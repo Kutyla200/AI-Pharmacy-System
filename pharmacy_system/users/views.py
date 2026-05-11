@@ -21,7 +21,7 @@ def login_view(request):
             login(request, user)
 
             if user.is_superuser:
-                return redirect('/admin')
+                return redirect('/admin/')
             else:
                 return redirect('dashboard')
         
@@ -80,3 +80,7 @@ def profile(request):
         messages.success(request, "Profile updated successfully!")
 
     return render(request, 'profile.html', {'user': user})
+
+
+def home(request):
+    return render(request, "home.html")
