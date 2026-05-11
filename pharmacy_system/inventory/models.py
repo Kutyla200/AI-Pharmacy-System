@@ -82,4 +82,21 @@ class DrugInteraction(models.Model):
     def __str__(self):
         return f"{self.medication1.name} + {self.medication2.name}"
     
-    
+class AIRecommendationLog(models.Model):
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    symptoms = models.TextField()
+
+    recommended_medication = models.CharField(max_length=200)
+
+    confidence_score = models.IntegerField()
+
+    risk_level = models.CharField(max_length=20)
+
+    explanation = models.TextField()
+
+    created_at = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.recommended_medication}"
