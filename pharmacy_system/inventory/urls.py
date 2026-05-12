@@ -11,5 +11,4 @@ urlpatterns = [
     path('checkout/', views.checkout, name='checkout'),
     path('my-orders/', views.my_orders, name='my_orders'),
     path('dashboard/', views.dashboard, name='dashboard'),
-    path('ai-checker/', views.ai_symptom_checker, name='ai_checker'),
 ]

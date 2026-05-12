@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'pharmacy_system.wsgi.application'
 DATABASES = {
  'default': {
  'ENGINE': 'django.db.backends.mysql',
- 'NAME': 'pharmacy_db',
+ 'NAME': 'pharmacy_db2',
  'USER': 'root',
  'PASSWORD': 'root',
  'HOST': 'localhost',
