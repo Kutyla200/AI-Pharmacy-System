@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,7 +16,28 @@
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
             <div class="container">
 
-                <a class="navbar-brand fw-bold" href="/">SmartPharm</a>
+                <a class="navbar-brand d-flex align-items-center" href="/">
+                    <div style="
+                        background:white;
+                        padding:2px;
+                        border-radius:10px;
+                        display:flex;
+                        align-items:center;
+                        justify-content:center;
+                        margin-right:10px;
+                    ">
+
+                        <img src="{% static 'images/logo_icon.png' %}"
+                            alt="SmartPharm Logo"
+                            style="height:50px; width:auto;">
+
+                    </div>
+                    
+                    <span class="fw-bold text-white" style="font-size:22px;">
+                        SmartPharm
+                    </span>
+
+                </a>
 
                 <div class="d-flex">
 
@@ -110,7 +132,7 @@
 
         <!-- FOOTER -->
         <footer class="text-center mt-5 mb-3 text-muted">
-            <small>© 2026 Pharmacy System</small>
+            <small>© 2026 SmartPharm Pharmacy System</small>
         </footer>
 
     </body>

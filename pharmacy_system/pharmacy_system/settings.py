@@ -127,6 +127,10 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 JAZZMIN_SETTINGS = {
     "site_title": "Pharmacy Admin",
     "site_header": "SmartPharm",

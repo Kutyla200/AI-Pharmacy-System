@@ -4,7 +4,7 @@
 
 <div class="container mt-4" style="max-width:700px;">
 
-<h2 class="mb-4">🤖 AI Pharmacy Assistant</h2>
+<h2 class="mb-4"><i class="bi bi-robot"></i> SmartPharm AI Assistant</h2>
 
 <!-- STEP 1 -->
 {% if step == 1 %}
@@ -13,7 +13,7 @@
 
 <div class="alert alert-primary">
 
-🤖 Hello 👋  
+<i class="bi bi-robot"></i> Hello {{ request.user.first_name }}. 
 What symptoms are you experiencing today?
 
 </div>
@@ -71,7 +71,7 @@ Next
 
 <div class="alert alert-secondary">
 
-🤖 I understand you selected:
+<i class="bi bi-robot"></i> I understand you have selected:
 
 <strong>
 {{ symptoms|join:", " }}
@@ -99,7 +99,7 @@ How severe are your symptoms?
 
 <br>
 
-<button class="btn btn-success w-100">
+<button class="btn btn-primary w-100">
 Submit
 </button>
 
@@ -114,7 +114,7 @@ Submit
 
 <div class="alert alert-info">
 
-🤖 Based on your symptoms and severity level, I recommend the following medications:
+<i class="bi bi-robot"></i> Based on your symptoms and severity level, I recommend the following medications:
 
 </div>
 
@@ -140,7 +140,7 @@ Submit
 
 <input type="hidden" name="quantity" value="1">
 
-<button class="btn btn-success">
+<button class="btn btn-primary">
 Add to Cart
 </button>
 
@@ -154,7 +154,7 @@ Add to Cart
 
 <div class="alert alert-warning mt-4">
 
-⚠ AI-assisted recommendations only.
+<i class="bi bi-exclamation-triangle text-danger"></i> AI-assisted recommendations only.
 Consult a healthcare professional if symptoms persist.
 
 </div>
