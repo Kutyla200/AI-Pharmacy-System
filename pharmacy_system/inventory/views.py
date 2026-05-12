@@ -145,3 +145,117 @@ def my_orders(request):
     return render(request, 'my_orders.html', {
         'orders': orders
     })
+
+import json
+import urllib.request
+import urllib.error
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Medication, AIRecommendationLog
+
+GEMINI_API_KEY = "AIzaSyBGSCx9Y5FNFXocgHFi5-9-N1tWxeGz6Cc"  # <-- REPLACE THIS
+
+SYSTEM_PROMPT = """You are a pharmacist AI. Respond ONLY with valid JSON, no markdown.
+Given symptoms and optional allergies/current medications, recommend ONE OTC medication.
+Rules: Only recommend unscheduled/OTC medications. Never recommend Schedule 3+.
+Always warn about dangerous combinations. Be concise.
+
+JSON format (strict):
+{
+  "medication": "medication name",
+  "confidence": 85,
+  "risk_level": "Low",
+  "explanation": "Brief reason (1-2 sentences)",
+  "warnings": "Any allergy or interaction warnings, or null",
+  "disclaimer": "Always consult a healthcare professional for persistent symptoms.",
+  "alternatives": ["alt1", "alt2"]
+}
+
+risk_level must be: Low, Medium, or High
+confidence: integer 0-100"""
+
+
+def call_gemini(symptoms, allergies, current_meds):
+    """Call Gemini API with minimal tokens."""
+    user_msg = f"Symptoms: {symptoms}"
+    if allergies:
+        user_msg += f". Allergies: {allergies}"
+    if current_meds:
+        user_msg += f". Current medications: {current_meds}"
+
+    payload = json.dumps({
+        "contents": [
+            {
+                "parts": [
+                    {"text": SYSTEM_PROMPT + "\n\nUser query: " + user_msg}
+                ]
+            }
+        ],
+        "generationConfig": {
+            "maxOutputTokens": 300,
+            "temperature": 0.1
+        }
+    }).encode('utf-8')
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={GEMINI_API_KEY}"
+    
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST"
+    )
+
+    with urllib.request.urlopen(req, timeout=15) as response:
+        data = json.loads(response.read())
+    
+    text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+    # Strip markdown code blocks if present
+    if text.startswith("```"):
+        text = text.split("```")[1]
+        if text.startswith("json"):
+            text = text[4:]
+    return json.loads(text.strip())
+
+
+@login_required
+def bot_pharmacist(request):
+    """Main Bot Pharmacist page."""
+    result = None
+    error = None
+
+    if request.method == "POST":
+        symptoms = request.POST.get("symptoms", "").strip()
+        allergies = request.POST.get("allergies", "").strip()
+        current_meds = request.POST.get("current_meds", "").strip()
+
+        if symptoms:
+            try:
+                result = call_gemini(symptoms, allergies, current_meds)
+
+                # Log to DB
+                AIRecommendationLog.objects.create(
+                    user=request.user,
+                    symptoms=symptoms,
+                    recommended_medication=result.get("medication", "Unknown"),
+                    confidence_score=result.get("confidence", 0),
+                    risk_level=result.get("risk_level", "Unknown"),
+                    explanation=result.get("explanation", "")
+                )
+
+            except urllib.error.HTTPError as e:
+                error = f"API Error {e.code}: Check your Gemini API key."
+            except Exception as e:
+                error = f"Something went wrong: {str(e)}"
+        else:
+            error = "Please describe your symptoms."
+
+    return render(request, "bot_pharmacist.html", {
+        "result": result,
+        "error": error,
+        "symptoms": request.POST.get("symptoms", ""),
+        "allergies": request.POST.get("allergies", ""),
+        "current_meds": request.POST.get("current_meds", ""),
+    })

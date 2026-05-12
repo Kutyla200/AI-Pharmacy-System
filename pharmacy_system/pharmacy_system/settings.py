@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-vj3n_qwr-&)b=xfqtj7ye%9+npc8h6j5$jp&x0ykx&-hr3-0u%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -37,12 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 
     'users',
     'inventory',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -80,9 +82,9 @@ DATABASES = {
  'ENGINE': 'django.db.backends.mysql',
  'NAME': 'pharmacy_db',
  'USER': 'root',
- 'PASSWORD': 'root',
+ 'PASSWORD': '',
  'HOST': 'localhost',
- 'PORT': '3306',
+ 'PORT': '3307',
  }
 }
 
@@ -121,3 +123,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+GEMINI_API_KEY = 'AIzaSyBGSCx9Y5FNFXocgHFi5-9-N1tWxeGz6Cc'
