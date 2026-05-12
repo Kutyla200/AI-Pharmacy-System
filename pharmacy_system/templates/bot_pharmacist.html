@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap');
+
+.bot-wrap {
+  max-width: 760px;
+  margin: 40px auto;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.bot-header {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+  border-radius: 16px 16px 0 0;
+  padding: 28px 32px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.bot-header .bot-icon {
+  font-size: 42px;
+  line-height: 1;
+}
+
+.bot-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.bot-header p {
+  margin: 4px 0 0;
+  opacity: 0.85;
+  font-size: 14px;
+}
+
+.bot-body {
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 16px 16px;
+  padding: 32px;
+}
+
+.form-label {
+  font-weight: 600;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1.5px solid #dee2e6;
+  padding: 10px 14px;
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 3px rgba(13,110,253,0.12);
+}
+
+.symptom-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chip {
+  background: #e9f2ff;
+  color: #0d6efd;
+  border: 1.5px solid #b6d0ff;
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+
+.chip:hover, .chip.active {
+  background: #0d6efd;
+  color: white;
+  border-color: #0d6efd;
+}
+
+.btn-diagnose {
+  background: linear-gradient(135deg, #0d6efd, #0a58ca);
+  border: none;
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  padding: 12px 32px;
+  border-radius: 10px;
+  width: 100%;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-top: 8px;
+}
+
+.btn-diagnose:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(13,110,253,0.35);
+}
+
+.btn-diagnose:disabled {
+  opacity: 0.7;
+  transform: none;
+}
+
+/* RESULT CARD */
+.result-card {
+  margin-top: 32px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1.5px solid #dee2e6;
+  animation: slideUp 0.35s ease;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.result-header {
+  padding: 20px 24px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.result-header.risk-low    { background: #198754; }
+.result-header.risk-medium { background: #fd7e14; }
+.result-header.risk-high   { background: #dc3545; }
+
+.result-med-name {
+  font-family: 'Space Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.result-sub {
+  font-size: 13px;
+  opacity: 0.9;
+  margin: 2px 0 0;
+}
+
+.confidence-ring {
+  text-align: center;
+  min-width: 80px;
+}
+
+.confidence-ring .score {
+  font-family: 'Space Mono', monospace;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.confidence-ring .label {
+  font-size: 11px;
+  opacity: 0.85;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+  background: rgba(255,255,255,0.22);
+}
+
+.result-body {
+  padding: 24px;
+  background: #fff;
+}
+
+.info-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
+
+.info-icon {
+  font-size: 20px;
+  min-width: 28px;
+  margin-top: 1px;
+}
+
+.info-content strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #868e96;
+  margin-bottom: 2px;
+}
+
+.info-content span {
+  font-size: 15px;
+  color: #212529;
+}
+
+.warning-box {
+  background: #fff3cd;
+  border: 1.5px solid #ffc107;
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.warning-box.danger {
+  background: #f8d7da;
+  border-color: #dc3545;
+}
+
+.warning-box .w-icon {
+  font-size: 20px;
+  min-width: 24px;
+}
+
+.warning-text {
+  font-size: 14px;
+  color: #664d03;
+  margin: 0;
+}
+
+.warning-box.danger .warning-text {
+  color: #58151c;
+}
+
+.alternatives-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.alt-chip {
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  color: #495057;
+}
+
+.disclaimer-box {
+  background: #f8f9fa;
+  border-left: 4px solid #0d6efd;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #6c757d;
+  margin-top: 20px;
+}
+
+.loading-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.8);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+.spinner-ring {
+  width: 56px; height: 56px;
+  border: 5px solid #dee2e6;
+  border-top-color: #0d6efd;
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.section-divider {
+  border: none;
+  border-top: 1px solid #f1f3f5;
+  margin: 20px 0;
+}
+</style>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner-ring"></div>
+  <div style="font-family:'DM Sans',sans-serif; font-weight:600; color:#0d6efd; font-size:15px;">
+    🤖 Analysing symptoms...
+  </div>
+</div>
+
+<div class="bot-wrap">
+
+  <!-- Header -->
+  <div class="bot-header">
+    <div class="bot-icon">🤖</div>
+    <div>
+      <h2>Bot Pharmacist</h2>
+      <p>AI-powered OTC medication recommendations · South African formulary</p>
+    </div>
+  </div>
+
+  <div class="bot-body">
+
+    {% if error %}
+    <div class="alert alert-danger d-flex align-items-center gap-2 mb-3" role="alert">
+      <span>⚠️</span> <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Quick Symptom Chips -->
+    <label class="form-label">Quick Symptoms</label>
+    <div class="symptom-chips" id="chipContainer">
+      <span class="chip" onclick="addChip(this)">Headache</span>
+      <span class="chip" onclick="addChip(this)">Fever</span>
+      <span class="chip" onclick="addChip(this)">Cough</span>
+      <span class="chip" onclick="addChip(this)">Sore throat</span>
+      <span class="chip" onclick="addChip(this)">Runny nose</span>
+      <span class="chip" onclick="addChip(this)">Body aches</span>
+      <span class="chip" onclick="addChip(this)">Nausea</span>
+      <span class="chip" onclick="addChip(this)">Heartburn</span>
+      <span class="chip" onclick="addChip(this)">Diarrhoea</span>
+      <span class="chip" onclick="addChip(this)">Constipation</span>
+      <span class="chip" onclick="addChip(this)">Toothache</span>
+      <span class="chip" onclick="addChip(this)">Allergy / itching</span>
+      <span class="chip" onclick="addChip(this)">Eye irritation</span>
+      <span class="chip" onclick="addChip(this)">Muscle pain</span>
+      <span class="chip" onclick="addChip(this)">Back pain</span>
+      <span class="chip" onclick="addChip(this)">Insomnia</span>
+      <span class="chip" onclick="addChip(this)">Fatigue</span>
+      <span class="chip" onclick="addChip(this)">Skin rash</span>
+    </div>
+
+    <!-- Form -->
+    <form method="POST" id="botForm">
+      {% csrf_token %}
+
+      <div class="mb-3">
+        <label class="form-label">Describe your symptoms *</label>
+        <textarea name="symptoms" id="symptomsInput" class="form-control"
+                  rows="3" placeholder="e.g. Headache and mild fever for 2 days..."
+                  required>{{ symptoms }}</textarea>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">⚠️ Known Allergies</label>
+        <input type="text" name="allergies" class="form-control"
+               placeholder="e.g. Penicillin, Aspirin, Sulfa drugs..."
+               value="{{ allergies }}">
+        <div class="form-text text-muted">Important for safe recommendations</div>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">💊 Current Medications</label>
+        <input type="text" name="current_meds" class="form-control"
+               placeholder="e.g. Warfarin, Metformin, Blood pressure pills..."
+               value="{{ current_meds }}">
+        <div class="form-text text-muted">Used to detect dangerous drug interactions</div>
+      </div>
+
+      <button type="submit" class="btn-diagnose" id="submitBtn">
+        🔍 Get Recommendation
+      </button>
+
+    </form>
+
+    <!-- RESULT -->
+    {% if result %}
+    <div class="result-card" id="resultCard">
+
+      <div class="result-header risk-{{ result.risk_level|lower }}">
+        <div>
+          <p class="result-sub">Recommended Medication</p>
+          <p class="result-med-name">{{ result.medication }}</p>
+          <span class="risk-badge">
+            {% if result.risk_level == "Low" %}🟢{% elif result.risk_level == "Medium" %}🟡{% else %}🔴{% endif %}
+            {{ result.risk_level }} Risk
+          </span>
+        </div>
+        <div class="confidence-ring">
+          <div class="score">{{ result.confidence }}%</div>
+          <div class="label">Match</div>
+        </div>
+      </div>
+
+      <div class="result-body">
+
+        <div class="info-row">
+          <span class="info-icon">💡</span>
+          <div class="info-content">
+            <strong>Why this medication</strong>
+            <span>{{ result.explanation }}</span>
+          </div>
+        </div>
+
+        {% if result.warnings %}
+        <div class="info-row">
+          <span class="info-icon">⚠️</span>
+          <div class="info-content" style="width:100%">
+            <strong>Warnings &amp; Interactions</strong>
+            <div class="warning-box {% if result.risk_level == 'High' %}danger{% endif %} mt-1">
+              <span class="w-icon">{% if result.risk_level == "High" %}🚨{% else %}⚠️{% endif %}</span>
+              <p class="warning-text">{{ result.warnings }}</p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        {% if result.alternatives %}
+        <div class="info-row">
+          <span class="info-icon">🔄</span>
+          <div class="info-content">
+            <strong>Alternative Options</strong>
+            <div class="alternatives-row">
+              {% for alt in result.alternatives %}
+              <span class="alt-chip">{{ alt }}</span>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="disclaimer-box">
+          <strong>⚕️ Medical Disclaimer:</strong> {{ result.disclaimer }}
+          This tool recommends unscheduled OTC medications only and does not replace professional medical advice.
+        </div>
+
+      </div>
+    </div>
+    {% endif %}
+
+  </div><!-- /bot-body -->
+</div><!-- /bot-wrap -->
+
+<script>
+// Chip selection → append to textarea
+function addChip(el) {
+  el.classList.toggle('active');
+  const textarea = document.getElementById('symptomsInput');
+  const chipText = el.textContent.trim();
+  let current = textarea.value.trim();
+
+  if (el.classList.contains('active')) {
+    textarea.value = current ? current + ', ' + chipText : chipText;
+  } else {
+    // Remove chip text from textarea
+    const regex = new RegExp(',?\\s*' + chipText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ',?\\s*', 'gi');
+    textarea.value = textarea.value.replace(regex, ' ').trim().replace(/^,|,$/g, '').trim();
+  }
+}
+
+// Show loading on submit
+document.getElementById('botForm').addEventListener('submit', function(e) {
+  const symptoms = document.getElementById('symptomsInput').value.trim();
+  if (!symptoms) return;
+  document.getElementById('loadingOverlay').classList.add('show');
+  document.getElementById('submitBtn').disabled = true;
+});
+
+// Scroll to result if present
+{% if result %}
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+{% endif %}
+</script>
+
+{% endblock %}

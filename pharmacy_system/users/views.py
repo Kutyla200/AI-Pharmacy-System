@@ -5,6 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
+import json
+import requests
+from django.http import JsonResponse
+from django.conf import settings
 
 @login_required
 def dashboard(request):
