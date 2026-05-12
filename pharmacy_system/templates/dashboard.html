@@ -6,16 +6,16 @@
 
   <!-- Banner -->
   <div class="banner text-center mb-4">
-      <h2>Welcome to Our Online Pharmacy</h2>
-      <p>Find safe OTC medications easily</p>
+    <h2>Welcome to Our Online Pharmacy</h2>
+    <p>Find safe OTC medication easily</p>
   </div>
 
   <!-- Medications Section -->
-  <h4 class="mb-3">Available Medications</h4>
+  <h4 class="mb-3">Available Medication</h4>
   <p>Total medications: {{ medications|length }}</p>
 
   <div class="row">
-    {% for med in medications %}
+    {% for med in medication %}
 
     <div class="col-md-4">
       <div class="card mb-3">

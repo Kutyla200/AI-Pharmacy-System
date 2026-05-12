@@ -11,38 +11,45 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import environ
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vj3n_qwr-&)b=xfqtj7ye%9+npc8h6j5$jp&x0ykx&-hr3-0u%'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
 
     'users',
     'inventory',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -76,14 +83,14 @@ WSGI_APPLICATION = 'pharmacy_system.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 DATABASES = {
- 'default': {
- 'ENGINE': 'django.db.backends.mysql',
- 'NAME': 'pharmacy_db2',
- 'USER': 'root',
- 'PASSWORD': 'root',
- 'HOST': 'localhost',
- 'PORT': '3306',
- }
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': env('DB_NAME'),
+        'USER': env('DB_USER'),
+        'PASSWORD': env('DB_PASSWORD'),
+        'HOST': env('DB_HOST'),
+        'PORT': env('DB_PORT'),
+    }
 }
 
 # Password validation
@@ -121,3 +128,34 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Pharmacy Admin",
+    "site_header": "SmartPharm",
+    "welcome_sign": "Welcome Admin",
+
+    #"theme": "flatly",  # try: flatly, cosmo, litera, lumen
+
+    "welcome_sign": "Welcome to SmartPharm",
+
+    "copyright": "SmartPharm Ltd"
+
+}
+
+JAZZMIN_UI_TWEAKS = {
+    "navbar_color": "navbar-primary",
+    "sidebar_color": "sidebar-dark-primary",
+    "accent": "accent-primary",
+    "theme": "cerulean"
+}
+
+GEMINI_API_KEY = 'AIzaSyBGSCx9Y5FNFXocgHFi5-9-N1tWxeGz6Cc'
