@@ -5,6 +5,10 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import logout
 from django.contrib.auth.models import User
+import json
+import requests
+from django.http import JsonResponse
+from django.conf import settings
 
 @login_required
 def dashboard(request):
@@ -21,7 +25,7 @@ def login_view(request):
             login(request, user)
 
             if user.is_superuser:
-                return redirect('/admin')
+                return redirect('/admin/')
             else:
                 return redirect('dashboard')
         
@@ -32,7 +36,8 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
-    return redirect('login')
+    #return redirect('login')
+    return redirect('home')
 
 def register_view(request):
 
@@ -80,3 +85,7 @@ def profile(request):
         messages.success(request, "Profile updated successfully!")
 
     return render(request, 'profile.html', {'user': user})
+
+
+def home(request):
+    return render(request, "home.html")

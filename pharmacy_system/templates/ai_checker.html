@@ -1,0 +1,660 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+  /* ── Google Font ── */
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ai-bg:        #0f1117;
+    --ai-surface:   #1a1d27;
+    --ai-border:    #2a2d3a;
+    --ai-accent:    #4f8ef7;
+    --ai-green:     #22c55e;
+    --ai-yellow:    #f59e0b;
+    --ai-red:       #ef4444;
+    --ai-text:      #e2e8f0;
+    --ai-muted:     #64748b;
+    --ai-radius:    14px;
+  }
+
+  .ai-wrap {
+    font-family: 'DM Sans', sans-serif;
+    max-width: 720px;
+    margin: 40px auto 80px;
+    color: var(--ai-text);
+  }
+
+  /* ── Header ── */
+  .ai-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .ai-avatar {
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, #4f8ef7, #9b59f7);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 0 0 4px rgba(79,142,247,.15);
+  }
+  .ai-header-text h2 {
+    margin: 0; font-size: 20px; font-weight: 700; color: #fff;
+  }
+  .ai-header-text p {
+    margin: 0; font-size: 13px; color: var(--ai-muted);
+  }
+
+  /* ── Step pill ── */
+  .step-track {
+    display: flex; gap: 8px; margin-bottom: 28px;
+  }
+  .step-pill {
+    flex: 1; height: 4px; border-radius: 4px;
+    background: var(--ai-border);
+    transition: background .3s;
+  }
+  .step-pill.active   { background: var(--ai-accent); }
+  .step-pill.done     { background: var(--ai-green); }
+
+  /* ── Card ── */
+  .ai-card {
+    background: var(--ai-surface);
+    border: 1px solid var(--ai-border);
+    border-radius: var(--ai-radius);
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  /* ── Bot bubble ── */
+  .bot-bubble {
+    display: flex; gap: 12px; margin-bottom: 24px;
+  }
+  .bot-icon {
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: linear-gradient(135deg,#4f8ef7,#9b59f7);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+  .bot-text {
+    background: #1e2230;
+    border: 1px solid var(--ai-border);
+    border-radius: 0 12px 12px 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--ai-text);
+    flex: 1;
+  }
+
+  /* ── Symptom checkboxes ── */
+  .symptom-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .symptom-chip input { display: none; }
+  .symptom-chip label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: var(--ai-bg);
+    border: 1px solid var(--ai-border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all .2s;
+    user-select: none;
+  }
+  .symptom-chip label:hover {
+    border-color: var(--ai-accent);
+    background: rgba(79,142,247,.07);
+  }
+  .symptom-chip input:checked + label {
+    border-color: var(--ai-accent);
+    background: rgba(79,142,247,.15);
+    color: #7eb5ff;
+  }
+  .symptom-chip label::before {
+    content: '';
+    width: 16px; height: 16px;
+    border: 2px solid var(--ai-border);
+    border-radius: 4px;
+    flex-shrink: 0;
+    transition: all .2s;
+  }
+  .symptom-chip input:checked + label::before {
+    background: var(--ai-accent);
+    border-color: var(--ai-accent);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M1 6l4 4 6-7'/%3E%3C/svg%3E");
+    background-size: 10px;
+    background-repeat: no-repeat;
+    background-position: center;
+  }
+
+  /* Custom symptom input */
+  .custom-input {
+    background: var(--ai-bg);
+    border: 1px solid var(--ai-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--ai-text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    width: 100%;
+    margin-top: 12px;
+    outline: none;
+    transition: border .2s;
+  }
+  .custom-input:focus { border-color: var(--ai-accent); }
+  .custom-input::placeholder { color: var(--ai-muted); }
+
+  /* ── Severity selector ── */
+  .severity-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .sev-option input { display: none; }
+  .sev-option label {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; padding: 18px 12px;
+    background: var(--ai-bg);
+    border: 2px solid var(--ai-border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px; font-weight: 600;
+    text-align: center;
+    transition: all .2s;
+  }
+  .sev-option label .sev-icon { font-size: 24px; }
+  .sev-option.mild   input:checked + label { border-color: var(--ai-green);  background: rgba(34,197,94,.1);  color: var(--ai-green); }
+  .sev-option.mod    input:checked + label { border-color: var(--ai-yellow); background: rgba(245,158,11,.1); color: var(--ai-yellow); }
+  .sev-option.severe input:checked + label { border-color: var(--ai-red);    background: rgba(239,68,68,.1);  color: var(--ai-red); }
+  .sev-option label:hover { border-color: var(--ai-accent); }
+
+  /* ── Tag pills (selected symptoms display) ── */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+  .tag {
+    background: rgba(79,142,247,.15);
+    color: #7eb5ff;
+    border: 1px solid rgba(79,142,247,.3);
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px; font-weight: 600;
+    text-transform: capitalize;
+  }
+
+  /* ── AI Submit button ── */
+  .btn-ai {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #4f8ef7, #7c5ef7);
+    border: none; border-radius: 10px;
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 15px; font-weight: 600;
+    cursor: pointer; margin-top: 20px;
+    transition: opacity .2s, transform .15s;
+  }
+  .btn-ai:hover { opacity: .9; transform: translateY(-1px); }
+  .btn-ai:active { transform: translateY(0); }
+
+  /* ── Result card ── */
+  .result-card {
+    background: var(--ai-surface);
+    border: 1px solid var(--ai-border);
+    border-radius: var(--ai-radius);
+    padding: 22px;
+    margin-bottom: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  .result-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+  }
+  .result-card.risk-low    { border-color: rgba(34,197,94,.3); }
+  .result-card.risk-low::before    { background: var(--ai-green); }
+  .result-card.risk-medium { border-color: rgba(245,158,11,.3); }
+  .result-card.risk-medium::before { background: var(--ai-yellow); }
+  .result-card.risk-high   { border-color: rgba(239,68,68,.3); }
+  .result-card.risk-high::before   { background: var(--ai-red); }
+
+  .result-top {
+    display: flex; align-items: flex-start;
+    justify-content: space-between; gap: 12px;
+    margin-bottom: 14px;
+  }
+  .result-name {
+    font-size: 18px; font-weight: 700; color: #fff;
+    margin: 0 0 4px;
+  }
+  .result-meta { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* badges */
+  .badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 10px; border-radius: 20px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .5px;
+  }
+  .badge-low    { background: rgba(34,197,94,.15);  color: var(--ai-green); }
+  .badge-medium { background: rgba(245,158,11,.15); color: var(--ai-yellow); }
+  .badge-high   { background: rgba(239,68,68,.15);  color: var(--ai-red); }
+  .badge-info   { background: rgba(79,142,247,.15); color: var(--ai-accent); }
+
+  /* confidence bar */
+  .confidence-wrap { min-width: 110px; text-align: right; }
+  .confidence-label {
+    font-size: 11px; color: var(--ai-muted); margin-bottom: 4px;
+  }
+  .confidence-bar {
+    height: 6px; background: var(--ai-border);
+    border-radius: 3px; overflow: hidden;
+  }
+  .confidence-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, #4f8ef7, #22c55e);
+    transition: width 1s ease;
+  }
+  .confidence-pct {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px; font-weight: 500;
+    color: var(--ai-accent); margin-top: 4px;
+  }
+
+  .result-explanation {
+    font-size: 13px; color: var(--ai-muted);
+    line-height: 1.6; margin-bottom: 12px;
+  }
+
+  /* warnings */
+  .warn-box {
+    background: rgba(245,158,11,.08);
+    border: 1px solid rgba(245,158,11,.25);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px; color: #fbbf24;
+    margin-bottom: 10px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+  .danger-box {
+    background: rgba(239,68,68,.08);
+    border: 1px solid rgba(239,68,68,.3);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px; color: #fca5a5;
+    margin-bottom: 10px;
+    display: flex; gap: 8px; align-items: flex-start;
+  }
+
+  /* not in stock */
+  .not-stocked {
+    font-size: 12px; color: var(--ai-muted);
+    background: var(--ai-bg); border-radius: 8px;
+    padding: 8px 12px; margin-top: 8px;
+  }
+
+  /* add to cart button */
+  .btn-cart {
+    background: var(--ai-green);
+    border: none; border-radius: 8px;
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 600;
+    padding: 9px 20px; cursor: pointer;
+    transition: opacity .2s;
+  }
+  .btn-cart:hover { opacity: .85; }
+
+  /* allergy note */
+  .allergy-note {
+    background: rgba(155,89,247,.08);
+    border: 1px solid rgba(155,89,247,.25);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 13px; color: #c4b5fd;
+    margin-bottom: 16px;
+    display: flex; gap: 10px; align-items: flex-start;
+  }
+
+  /* disclaimer */
+  .disclaimer-box {
+    background: var(--ai-bg);
+    border: 1px solid var(--ai-border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    font-size: 12px; color: var(--ai-muted);
+    margin-top: 24px;
+    display: flex; gap: 10px; align-items: center;
+  }
+
+  /* error */
+  .err-box {
+    background: rgba(239,68,68,.08);
+    border: 1px solid rgba(239,68,68,.25);
+    border-radius: 10px; padding: 12px 16px;
+    color: #fca5a5; font-size: 13px; margin-bottom: 16px;
+  }
+
+  /* restart */
+  .btn-restart {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 20px;
+    background: transparent;
+    border: 1px solid var(--ai-border);
+    border-radius: 8px;
+    color: var(--ai-muted); font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    transition: all .2s; margin-top: 8px;
+  }
+  .btn-restart:hover {
+    border-color: var(--ai-accent); color: var(--ai-accent);
+  }
+
+  /* loading spinner */
+  .loading-wrap {
+    display: none; text-align: center; padding: 40px 20px;
+  }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid var(--ai-border);
+    border-top-color: var(--ai-accent);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* price */
+  .price-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 16px; font-weight: 600; color: var(--ai-green);
+  }
+
+  .result-footer {
+    display: flex; align-items: center;
+    justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 1px solid var(--ai-border);
+  }
+</style>
+
+<div class="ai-wrap">
+
+  <!-- Header -->
+  <div class="ai-header">
+    <div class="ai-avatar">🤖</div>
+    <div class="ai-header-text">
+      <h2>AI Pharmacist</h2>
+      <p>Powered by Gemini · Responses are AI-generated, not medical advice</p>
+    </div>
+  </div>
+
+  <!-- Step tracker -->
+  <div class="step-track">
+    <div class="step-pill {% if step >= 1 %}{% if step > 1 %}done{% else %}active{% endif %}{% endif %}"></div>
+    <div class="step-pill {% if step >= 2 %}{% if step > 2 %}done{% else %}active{% endif %}{% endif %}"></div>
+    <div class="step-pill {% if step >= 3 %}active{% endif %}"></div>
+  </div>
+
+  <!-- ═══════════════════════════════════════
+       STEP 1 — Select Symptoms
+  ═══════════════════════════════════════ -->
+  {% if step == 1 %}
+  <div class="ai-card">
+    <div class="bot-bubble">
+      <div class="bot-icon">🤖</div>
+      <div class="bot-text">
+        Hello! I'm your AI Pharmacist. Select the symptoms you're experiencing below,
+        and I'll recommend suitable over-the-counter medications for you.
+      </div>
+    </div>
+
+    {% if error %}
+    <div class="err-box">⚠ {{ error }}</div>
+    {% endif %}
+
+    <form method="POST" id="step1-form">
+      {% csrf_token %}
+
+      <p style="font-size:13px;color:var(--ai-muted);margin-bottom:12px;">
+        Select all that apply:
+      </p>
+
+      <div class="symptom-grid">
+
+        {% for sym, label, icon in symptom_choices %}
+        <div class="symptom-chip">
+          <input type="checkbox" name="symptoms" value="{{ sym }}" id="sym_{{ sym }}">
+          <label for="sym_{{ sym }}">{{ icon }} {{ label }}</label>
+        </div>
+        {% endfor %}
+
+      </div>
+
+      <input
+        type="text"
+        name="custom_symptom"
+        class="custom-input"
+        placeholder="Other symptom (type here)..."
+        maxlength="60"
+      >
+
+      <button type="submit" class="btn-ai">
+        Continue →
+      </button>
+    </form>
+  </div>
+  {% endif %}
+
+
+  <!-- ═══════════════════════════════════════
+       STEP 2 — Select Severity
+  ═══════════════════════════════════════ -->
+  {% if step == 2 %}
+  <div class="ai-card">
+    <div class="bot-bubble">
+      <div class="bot-icon">🤖</div>
+      <div class="bot-text">
+        I see you're experiencing:
+        <div class="tag-list" style="margin-top:8px;">
+          {% for s in symptoms %}<span class="tag">{{ s }}</span>{% endfor %}
+        </div>
+        How severe are these symptoms?
+      </div>
+    </div>
+
+    <form method="POST" id="step2-form" onsubmit="showLoading()">
+      {% csrf_token %}
+
+      <div class="severity-grid">
+        <div class="sev-option mild">
+          <input type="radio" name="severity" value="Mild" id="sev_mild" checked>
+          <label for="sev_mild">
+            <span class="sev-icon">🟢</span>
+            Mild
+            <span style="font-size:11px;font-weight:400;color:var(--ai-muted);">Manageable</span>
+          </label>
+        </div>
+        <div class="sev-option mod">
+          <input type="radio" name="severity" value="Moderate" id="sev_mod">
+          <label for="sev_mod">
+            <span class="sev-icon">🟡</span>
+            Moderate
+            <span style="font-size:11px;font-weight:400;color:var(--ai-muted);">Noticeable</span>
+          </label>
+        </div>
+        <div class="sev-option severe">
+          <input type="radio" name="severity" value="Severe" id="sev_severe">
+          <label for="sev_severe">
+            <span class="sev-icon">🔴</span>
+            Severe
+            <span style="font-size:11px;font-weight:400;color:var(--ai-muted);">Disabling</span>
+          </label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-ai">
+        🔍 Analyse with AI
+      </button>
+
+      <!-- Loading state -->
+      <div class="loading-wrap" id="loading-wrap">
+        <div class="spinner"></div>
+        <p style="color:var(--ai-muted);font-size:13px;">
+          AI Pharmacist is analysing your symptoms…
+        </p>
+      </div>
+    </form>
+  </div>
+  {% endif %}
+
+
+  <!-- ═══════════════════════════════════════
+       STEP 3 — Results
+  ═══════════════════════════════════════ -->
+  {% if step == 3 %}
+
+  {% if error %}
+  <div class="err-box">⚠ {{ error }}</div>
+  {% endif %}
+
+  <div class="bot-bubble" style="margin-bottom:20px;">
+    <div class="bot-icon">🤖</div>
+    <div class="bot-text">
+      Based on your <strong>{{ symptoms|join:", " }}</strong>
+      symptoms (severity: <strong>{{ severity }}</strong>), here are my recommendations:
+    </div>
+  </div>
+
+  <!-- Allergy note -->
+  {% if allergy_note %}
+  <div class="allergy-note">
+    <span style="font-size:18px;">⚗</span>
+    <div><strong>Allergy Note:</strong> {{ allergy_note }}</div>
+  </div>
+  {% endif %}
+
+  <!-- Result cards -->
+  {% for item in medication_objects %}
+
+  {% with info=item.info %}
+  <div class="result-card risk-{{ info.risk|lower }}">
+
+    <div class="result-top">
+      <div>
+        <h3 class="result-name">{{ info.medicine }}</h3>
+        <div class="result-meta">
+          <span class="badge badge-{{ info.risk|lower }}">
+            {% if info.risk == 'Low' %}🟢{% elif info.risk == 'Medium' %}🟡{% else %}🔴{% endif %}
+            {{ info.risk }} Risk
+          </span>
+          {% if item.med %}
+          <span class="badge badge-info">In Stock</span>
+          {% else %}
+          <span class="badge" style="background:rgba(100,116,139,.15);color:var(--ai-muted);">
+            Not Stocked
+          </span>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="confidence-wrap">
+        <div class="confidence-label">AI Confidence</div>
+        <div class="confidence-bar">
+          <div class="confidence-fill" style="width:{{ info.confidence }}%"></div>
+        </div>
+        <div class="confidence-pct">{{ info.confidence }}%</div>
+      </div>
+    </div>
+
+    <p class="result-explanation">{{ info.explanation }}</p>
+
+    <!-- Specific warning -->
+    {% if info.warnings %}
+    <div class="warn-box">
+      <span>⚠</span>
+      <span>{{ info.warnings }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Dangerous combination with cart -->
+    {% if info.dangerous_combo %}
+    <div class="danger-box">
+      <span>🚫</span>
+      <div>
+        <strong>Dangerous Combination Detected</strong><br>
+        {{ info.combo_reason }}
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="result-footer">
+      {% if item.med %}
+      <span class="price-tag">R{{ item.med.price }}</span>
+
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <a href="/medication/{{ item.med.id }}/"
+           style="color:var(--ai-accent);font-size:13px;text-decoration:none;
+                  display:flex;align-items:center;gap:4px;">
+          📋 View Details
+        </a>
+        <form method="POST" action="/add-to-cart/{{ item.med.id }}/">
+          {% csrf_token %}
+          <input type="hidden" name="quantity" value="1">
+          <button class="btn-cart" {% if info.dangerous_combo %}
+            onclick="return confirm('⚠ Warning: This medication may interact dangerously with your current cart. Add anyway?')"
+          {% endif %}>
+            🛒 Add to Cart
+          </button>
+        </form>
+      </div>
+      {% else %}
+      <div class="not-stocked">
+        This medication is not currently stocked in our pharmacy.
+        Ask your pharmacist for alternatives.
+      </div>
+      {% endif %}
+    </div>
+
+  </div>
+  {% endwith %}
+
+  {% empty %}
+  <div class="ai-card" style="text-align:center;padding:40px;">
+    <p style="color:var(--ai-muted);">No recommendations could be generated. Please consult a pharmacist.</p>
+  </div>
+  {% endfor %}
+
+  <!-- Disclaimer -->
+  <div class="disclaimer-box">
+    <span style="font-size:20px;">ℹ</span>
+    <span>{{ disclaimer }} Always consult a licensed healthcare professional before taking any medication.</span>
+  </div>
+
+  <!-- Restart -->
+  <a href="/ai-checker/" class="btn-restart">
+    ← Start Over
+  </a>
+
+  {% endif %}
+
+</div>
+
+<script>
+  function showLoading() {
+    document.querySelector('#step2-form button[type=submit]').style.display = 'none';
+    document.getElementById('loading-wrap').style.display = 'block';
+  }
+</script>
+
+{% endblock %}
