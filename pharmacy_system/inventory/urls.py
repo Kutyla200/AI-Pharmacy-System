@@ -12,4 +12,6 @@ urlpatterns = [
     path('my-orders/', views.my_orders, name='my_orders'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('bot-pharmacist/', views.bot_pharmacist, name='bot_pharmacist'),
+    path('ai-checker/', views.ai_symptom_checker, name='ai_checker'),
+    path('remove-from-cart/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
 ]

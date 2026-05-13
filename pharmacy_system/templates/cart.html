@@ -2,64 +2,60 @@
 
 {% block content %}
 
+<div class="container mt-4">
+
+<h2 class="mb-3">Your Cart</h2>
+
 {% if warnings %}
 
-<div class="alert alert-warning">
+<div class="alert alert-warning shadow-sm">
 
 <h4>⚠ Possible Drug Interactions Detected</h4>
 
 <p>
 The following medications in your cart may interact with each other.
-Please consult a healthcare professional before use.
+Please consult a healthcare professional before using them together.
 </p>
 
 <ul>
-
 {% for warning in warnings %}
 
-<li>
-
-<strong>
-{{ warning.medication1.name }}
-</strong>
-
+<li class="mb-3">
+<strong>{{ warning.medication1.name }}</strong>
 and
-
-<strong>
-{{ warning.medication2.name }}
-</strong>
+<strong>{{ warning.medication2.name }}</strong>
 
 <br>
 
-<strong>Risk Level:</strong>
-{{ warning.severity }}
+<strong>Risk Level:</strong> {{ warning.severity }}
 
 <br>
 
 {{ warning.description }}
-
 </li>
 
-<br>
-
 {% endfor %}
-
 </ul>
 
 </div>
 
 {% endif %}
 
-<h2>Your Cart</h2>
+{% if items %}
 
+<table class="table table-bordered table-striped align-middle">
 
-<table class="table">
-
+<thead class="table-light">
 <tr>
 <th>Medication</th>
 <th>Quantity</th>
 <th>Price</th>
+<th>Subtotal</th>
+<th>Action</th>
 </tr>
+</thead>
+
+<tbody>
 
 {% for item in items %}
 
@@ -67,14 +63,48 @@ and
 <td>{{ item.medication.name }}</td>
 <td>{{ item.quantity }}</td>
 <td>R{{ item.medication.price }}</td>
+<td>R{{ item.medication.price|floatformat:2 }}</td>
+<td>
+<a href="{% url 'remove_from_cart' item.id %}" class="btn btn-danger btn-sm">
+Remove
+</a>
+</td>
 </tr>
 
 {% endfor %}
 
+</tbody>
+
 </table>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
 
 <h4>Total: R{{ total }}</h4>
 
-<a href="/checkout" class="btn btn-primary">Checkout</a>
+<div>
+<a href="{% url 'medications' %}" class="btn btn-secondary">
+Continue Shopping
+</a>
+
+<a href="/checkout" class="btn btn-primary">
+Checkout
+</a>
+</div>
+
+</div>
+
+{% else %}
+
+<div class="alert alert-info">
+Your cart is empty.
+</div>
+
+<a href="{% url 'medications' %}" class="btn btn-primary">
+Go to Shop
+</a>
+
+{% endif %}
+
+</div>
 
 {% endblock %}

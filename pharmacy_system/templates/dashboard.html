@@ -11,8 +11,7 @@
   </div>
 
   <!-- Medications Section -->
-  <h4 class="mb-3">Available Medication</h4>
-  <p>Total medications: {{ medications|length }}</p>
+  
 
   <div class="row">
     {% for med in medication %}
@@ -37,9 +36,7 @@
     </div>
 
     {% empty %}
-    <div class="alert alert-warning">
-      No medications available.
-    </div>
+    
     {% endfor %}
   </div> <!-- row -->
 
