@@ -13,3 +13,4 @@ requests==2.34.0
 sqlparse==0.5.5
 tzdata==2025.3
 urllib3==2.7.0
+gunicorn==26.0.0
