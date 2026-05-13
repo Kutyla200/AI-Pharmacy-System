@@ -69,36 +69,47 @@ def view_cart(request):
 
     total = sum(item.medication.price * item.quantity for item in items)
 
-    warnings = set()
+    warnings = []
 
     medications = [item.medication for item in items]
 
-    for med1 in medications:
-        for med2 in medications:
+    for i in range(len(medications)):
+        for j in range(i + 1, len(medications)):
 
-            if med1 != med2:
+            med1 = medications[i]
+            med2 = medications[j]
 
-                interaction = DrugInteraction.objects.filter(
-                    medication1=med1,
-                    medication2=med2
-                ).first()
+            interaction = DrugInteraction.objects.filter(
+                medication1=med1,
+                medication2=med2
+            ).first()
 
-                reverse_interaction = DrugInteraction.objects.filter(
-                    medication1=med2,
-                    medication2=med1
-                ).first()
+            reverse_interaction = DrugInteraction.objects.filter(
+                medication1=med2,
+                medication2=med1
+            ).first()
 
-                if interaction and interaction not in warnings:
-                    warnings.add(interaction)
+            if interaction:
+                warnings.append(interaction)
 
-                if reverse_interaction and reverse_interaction not in warnings:
-                    warnings.add(reverse_interaction)
+            elif reverse_interaction:
+                warnings.append(reverse_interaction)
 
     return render(request, 'cart.html', {
         'items': items,
         'total': total,
         'warnings': warnings
     })
+
+@login_required
+def remove_from_cart(request, item_id):
+
+    item = CartItem.objects.get(id=item_id)
+
+    if item.user == request.user:
+        item.delete()
+
+    return redirect('view_cart')
 
 @login_required
 def checkout(request):
@@ -271,3 +282,186 @@ def bot_pharmacist(request):
         "allergies": request.POST.get("allergies", ""),
         "current_meds": request.POST.get("current_meds", ""),
     })
+
+@login_required
+def ai_symptom_checker(request):
+
+    step = 1
+    symptoms = []
+    allergies = []
+    severity = ""
+
+    all_symptoms = set()
+    all_allergies = set()
+
+    medications = Medication.objects.all()
+
+    for med in medications:
+        if med.keywords:
+            for word in med.keywords.lower().split(","):
+                clean_word = word.strip()
+                if len(clean_word) > 2:
+                    all_symptoms.add(clean_word)
+
+        # allergy options based on medicine names
+        all_allergies.add(med.name.lower())
+
+    all_symptoms = sorted(all_symptoms)
+    all_allergies = sorted(all_allergies)
+
+    # STEP 1: symptoms
+    if request.method == "POST" and "symptoms" in request.POST:
+
+        symptoms = request.POST.getlist("symptoms")
+        request.session["symptoms"] = symptoms
+
+        return render(request, "ai_checker.html", {
+            "step": 2,
+            "symptoms": symptoms,
+            "all_symptoms": all_symptoms,
+            "all_allergies": all_allergies,
+        })
+
+    # STEP 2: allergies
+    elif request.method == "POST" and "allergy_step" in request.POST:
+
+        allergies = request.POST.getlist("allergies")
+        request.session["allergies"] = allergies
+
+        symptoms = request.session.get("symptoms", [])
+
+        return render(request, "ai_checker.html", {
+            "step": 3,
+            "symptoms": symptoms,
+            "allergies": allergies,
+            "all_symptoms": all_symptoms,
+            "all_allergies": all_allergies,
+        })
+
+    # STEP 3: severity + recommendation
+    elif request.method == "POST" and "severity" in request.POST:
+
+        symptoms = request.session.get("symptoms", [])
+        allergies = request.session.get("allergies", [])
+        severity = request.POST.get("severity")
+
+        recommendations = []
+
+        for med in medications:
+
+            searchable_text = (
+                med.name + " " +
+                med.description + " " +
+                med.uses + " " +
+                med.keywords
+            ).lower()
+
+            matched_symptoms = []
+
+            for symptom in symptoms:
+                if symptom.lower() in searchable_text:
+                    matched_symptoms.append(symptom)
+
+            if matched_symptoms:
+
+                allergy_match = False
+
+                for allergy in allergies:
+                    allergy = allergy.lower().strip()
+
+                    if allergy and allergy in med.name.lower():
+                        allergy_match = True
+                        break
+
+                if allergy_match:
+                    continue  # do not recommend medicine user is allergic to
+
+                symptom_score = len(matched_symptoms) / len(symptoms) * 100
+
+                keyword_matches = sum(
+                    1 for s in symptoms if s.lower() in med.keywords.lower()
+                )
+
+                keyword_score = keyword_matches / len(symptoms) * 100
+
+                if severity == "Mild":
+                    severity_score = 90
+                elif severity == "Moderate":
+                    severity_score = 70
+                else:
+                    severity_score = 50
+
+                confidence = round(
+                    symptom_score * 0.5 +
+                    keyword_score * 0.3 +
+                    severity_score * 0.2
+                )
+
+                if severity == "Severe":
+                    risk = "Medium"
+                elif confidence < 50:
+                    risk = "Medium"
+                else:
+                    risk = "Low"
+
+                explanation = (
+                    f"{med.name} was recommended because it matched "
+                    f"{len(matched_symptoms)} symptom(s): "
+                    f"{', '.join(matched_symptoms)}. "
+
+                    f"The recommendation confidence score is "
+                    f"{round(confidence)}%. "
+
+                    f"Risk level assessed: {risk}. "
+
+                    f"Your selected severity level was {severity}."
+                )
+
+                recommendations.append({
+                    "med": med,
+                    "confidence": confidence,
+                    "risk": risk,
+                    "explanation": explanation
+                })
+
+        recommendations = sorted(
+            recommendations,
+            key=lambda x: x["confidence"],
+            reverse=True
+        )[:3]
+
+        if not recommendations:
+
+            return render(request, 'ai_checker.html', {
+                'step': 4,
+                'safe_message': 'No safe recommendation was found based on your symptoms and allergies.',
+                'all_symptoms': all_symptoms,
+                'all_allergies': all_allergies,
+            })
+
+        for rec in recommendations:
+            AIRecommendationLog.objects.create(
+                user=request.user,
+                symptoms=", ".join(symptoms),
+                recommended_medication=rec["med"].name,
+                confidence_score=rec["confidence"],
+                risk_level=rec["risk"],
+                explanation=rec["explanation"]
+            )
+
+        return render(request, "ai_checker.html", {
+            "step": 4,
+            "medication_objects": recommendations,
+            "severity": severity,
+            "symptoms": symptoms,
+            "allergies": allergies,
+            "all_symptoms": all_symptoms,
+            "all_allergies": all_allergies,
+        })
+
+    return render(request, "ai_checker.html", {
+        "step": step,
+        "all_symptoms": all_symptoms,
+        "all_allergies": all_allergies,
+    })
+
