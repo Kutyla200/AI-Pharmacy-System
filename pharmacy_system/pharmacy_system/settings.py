@@ -84,7 +84,7 @@ WSGI_APPLICATION = 'pharmacy_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('DB_NAME'),
         'USER': env('DB_USER'),
         'PASSWORD': env('DB_PASSWORD'),
@@ -159,3 +159,6 @@ JAZZMIN_UI_TWEAKS = {
 }
 
 GEMINI_API_KEY = 'AIzaSyBGSCx9Y5FNFXocgHFi5-9-N1tWxeGz6Cc'
+
+LOGIN_REDIRECT_URL = "/dashboard/"
+LOGIN_URL = "/login/"

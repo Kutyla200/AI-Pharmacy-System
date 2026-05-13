@@ -1,23 +1,24 @@
 {% load static %}
 <!DOCTYPE html>
 <html>
-    <head>
+
+<head>
 
     <title>Home</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-    </head>
+</head>
 
-    <body>
+<body>
 
-        <!-- NAVBAR -->
-        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-            <div class="container">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
 
-                <a class="navbar-brand d-flex align-items-center" href="/">
-                    <div style="
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <div style="
                         background:white;
                         padding:2px;
                         border-radius:10px;
@@ -27,113 +28,132 @@
                         margin-right:10px;
                     ">
 
-                        <img src="{% static 'images/logo_icon.png' %}"
-                            alt="SmartPharm Logo"
-                            style="height:50px; width:auto;">
-
-                    </div>
-                    
-                    <span class="fw-bold text-white" style="font-size:22px;">
-                        SmartPharm
-                    </span>
-
-                </a>
-
-                <div class="d-flex">
-
-                    <a href="/login" class="btn btn-light btn-sm me-2">
-                        Login
-                    </a>
-
-                    <a href="/register" class="btn btn-outline-light btn-sm me-2">
-                        Register
-                    </a>
-
-                    <!-- Admin Login Button -->
-                    <a href="/admin/login" class="btn btn-dark btn-sm">
-                        Admin Login
-                    </a>
+                    <img src="{% static 'images/logo_icon.png' %}" alt="SmartPharm Logo"
+                        style="height:50px; width:auto;">
 
                 </div>
 
+                <span class="fw-bold text-white" style="font-size:22px;">
+                    SmartPharm
+                </span>
+
+            </a>
+
+            <div class="d-flex">
+
+                <a href="/login" class="btn btn-light btn-sm me-2">
+                    Login
+                </a>
+
+                <a href="/register" class="btn btn-outline-light btn-sm me-2">
+                    Register
+                </a>
+
+                <!-- Admin Login Button -->
+                <a href="/admin/login" class="btn btn-dark btn-sm">
+                    Admin Login
+                </a>
+
             </div>
-        </nav>
 
-        <!-- HERO SECTION -->
-        <div class="container mt-5">
+        </div>
+    </nav>
 
-            <div class="text-center mb-5">
+    <!-- HERO SECTION -->
+    <div class="container mt-5">
 
-                <h1 class="fw-bold text-primary">
+        <div class="text-center mb-5">
+
+            <h1 class="fw-bold text-primary">
                 Welcome to SmartPharm
-                </h1>
+            </h1>
 
-                <p class="text-muted">
+            <p class="text-muted">
                 Healthcare at Your Fingertips
-                </p>
+            </p>
 
-                <a href="/login" class="btn btn-primary btn-lg mt-2">
+            <a href="/login" class="btn btn-primary btn-lg mt-2">
                 Get Started
-                </a>
+            </a>
 
+        </div>
+
+        <!-- FEATURE CARDS -->
+        <div class="row g-4">
+
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+
+                        <h3 class="text-primary"><i class="bi bi-capsule"></i></h3>
+
+                        <h5>Medication Recommendation</h5>
+                        <p class="text-muted">
+                            Get medication recommendations based on your symptoms.
+                        </p>
+
+                    </div>
+                </div>
             </div>
 
-            <!-- FEATURE CARDS -->
-            <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
 
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center">
+                        <h3 class="text-primary"><i class="bi bi-arrow-repeat"></i></h3>
 
-                            <h3 class="text-primary"><i class="bi bi-capsule"></i></h3>
+                        <h5>Medication Interaction</h5>
+                        <p class="text-muted">
+                            Safely confirm medication interactions before checkout.
+                        </p>
 
-                            <h5>Medication Recommendation</h5>
-                            <p class="text-muted">
-                                Get medication recommendations based on your symptoms.
-                            </p>
-
-                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
 
-                            <h3 class="text-primary"><i class="bi bi-arrow-repeat"></i></h3>
+                        <h3 class="text-primary"><i class="bi bi-cart-check"></i></h3>
 
-                            <h5>Medication Interaction</h5>
-                            <p class="text-muted">
-                                Safely confirm medication interactions before checkout.
-                            </p>
+                        <h5>Shop Medication</h5>
+                        <p class="text-muted">
+                            Browse and shop our categories of OTC medication.
+                        </p>
 
-                        </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center">
+        </div>
 
-                            <h3 class="text-primary"><i class="bi bi-cart-check"></i></h3>
+    </div>
 
-                            <h5>Shop Medication</h5>
-                            <p class="text-muted">
-                                Browse and shop our categories of OTC medication.
-                            </p>
+    <footer class="text-center mt-5 mb-3 text-muted">
 
-                        </div>
-                    </div>
-                </div>
+        <div class="d-flex justify-content-center mb-2">
+
+            <div style="
+                background:white;
+                padding:4px;
+                border-radius:10px;
+                display:flex;
+                align-items:center;
+                justify-content:center;
+                box-shadow:0 2px 6px rgba(0,0,0,0.1);
+            ">
+
+                <img src="{% static 'images/logo.png' %}" alt="SmartPharm Logo" style="height:60px; width:auto;">
 
             </div>
 
         </div>
 
-        <!-- FOOTER -->
-        <footer class="text-center mt-5 mb-3 text-muted">
-            <small>© 2026 SmartPharm Pharmacy System</small>
-        </footer>
+        <small>© 2026 SmartPharm Pharmacy System</small>
 
-    </body>
+    </footer>
+
+</body>
+
 </html>

@@ -21,10 +21,10 @@ from django.contrib.auth import views as auth_views
 from users import views
 
 urlpatterns = [
-    path('admin/login/', auth_views.LoginView.as_view(template_name='admin_login.html'), name='login'),
+    #path('admin/login/', auth_views.LoginView.as_view(template_name='admin_login.html'), name='login'),
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('', include('inventory.urls')),
     #path('', RedirectView.as_view(url='/login/')),
-    path("", views.home, name="home")
+    path('', views.home, name="home")
 ]
